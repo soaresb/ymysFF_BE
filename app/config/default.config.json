@@ -1,0 +1,7 @@
+{
+    "APP": "NFLFANTASY-V2-API",
+    "PORT": 80,
+    "LOG_LEVEL": "info",
+    "ALLOWED_ORIGINS": "*",
+    "MONGODB_CONNECTION_STRING": "mongodb://localhost:27017/ymys"
+}
