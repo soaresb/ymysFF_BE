@@ -8,6 +8,7 @@ require("./season");
 require("./player_stats");
 require("./ranking");
 require("./draft_pick");
+require("./ranking_article");
 
 mongoose.Promise = Promise;
 

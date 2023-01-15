@@ -11,8 +11,8 @@ module.exports = class LeagueController {
     async getLeagueInfo(req, res, next) {
         try {
             const info = this.leagueService.getLeagueInfo()
-            if (x) {
-                res.status(200).json(this.formatResponse(200, "Success", {}));
+            if (info) {
+                res.status(200).json(this.formatResponse(200, "Success", info));
             } else {
                 res.status(404).json(this.formatResponse(404, "Not found", [{ msg: "League not found." }]));
             }
@@ -81,6 +81,47 @@ module.exports = class LeagueController {
                 res.status(404).json(this.formatResponse(404, "Not found", [{ msg: "Draft not found." }]));
             }
             
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    async postLeaguePowerRanking(req, res, next) {
+        const { body, week, year } = req.body;
+        try {
+            const success = await this.leagueService.postLeaguePowerRanking(body, week, year);
+            if (success) {
+                res.status(200).json(this.formatResponse(200, "Success", success));
+            } else {
+                res.status(404).json(this.formatResponse(400, "Error adding ranking article.", [{ msg: "Error adding ranking article." }]));
+            }
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    async getLeaguePowerRanking(req, res, next) {
+        const { week, year } = req.query;
+        try {
+            const powerRanking = await this.leagueService.getLeaguePowerRanking(week, year);
+            if (powerRanking) {
+                res.status(200).json(this.formatResponse(200, "Success", powerRanking));
+            } else {
+                res.status(404).json(this.formatResponse(400, "Error adding ranking article.", [{ msg: "Error adding ranking article." }]));
+            }
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    async getLeaguePowerRankings(req, res, next) {
+        try {
+            const powerRankings = await this.leagueService.getLeaguePowerRankings();
+            if (powerRankings) {
+                res.status(200).json(this.formatResponse(200, "Success", powerRankings));
+            } else {
+                res.status(404).json(this.formatResponse(400, "Error adding ranking article.", [{ msg: "Error adding ranking article." }]));
+            }
         } catch (err) {
             next(err);
         }

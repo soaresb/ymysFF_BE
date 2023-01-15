@@ -128,4 +128,21 @@ module.exports = class TeamController {
         }
     }
 
+    async getDraftPicksByTeam(req, res, next) {
+        try {
+            const teamId = parseInt(req.params.teamId);
+            const { details } = req.query;
+            const data = await this.teamService.getDraftPicksByTeam(teamId, details);
+            if (data) {
+                res.status(200).json(this.formatResponse(200, "Success", data));
+            } else {
+                res.status(404).json(this.formatResponse(404, "Not found", [{ msg: "Record not found." }]));
+            }
+            
+            
+        } catch (err) {
+            next(err);
+        }
+    }
+
 };

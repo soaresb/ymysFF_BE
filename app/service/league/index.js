@@ -2,13 +2,15 @@ const _ = require("lodash");
 const logger = require("../../utils/logger");
 
 module.exports = class LeagueService {
-    constructor({ Helpers, DB, Settings }) {
+    constructor({ TeamService, Helpers, DB, Settings }) {
         this.formatResponse = Helpers.http.formatResponse;
         this.leagueModel = DB.model("League");
         this.teamModel = DB.model("Team");
         this.rankingsModel = DB.model("Ranking");
         this.matchupModel = DB.model("Matchup");
         this.draftPickModel = DB.model("DraftPick");
+        this.powerRankingModel = DB.model("PowerRanking");
+        this.teamService = TeamService
         this.settings = Settings;
         this.league = null;
     }
@@ -21,7 +23,7 @@ module.exports = class LeagueService {
     }
 
     getLeagueInfo() {
-        
+        return this.league;
     }
 
     getLeague() {
@@ -64,7 +66,7 @@ module.exports = class LeagueService {
         if (year) {
             matchups = await this.matchupModel.find({ year: parseInt(year) });
         } else {
-            matchups = await this.matchupModel.find({ week: { $ne: 17 } });
+            matchups = await this.matchupModel.find({ post_elimination: { $ne: true } });
         }
         if (matchups) {
             _.forEach(matchups, (matchup) => {
@@ -101,7 +103,13 @@ module.exports = class LeagueService {
                 }
             });
         }
-        return standings;
+        const standingsWithTeam = []
+        for (const espn_team_id of Object.keys(standings)) {
+            const standing = standings[espn_team_id];
+            const team = await this.teamModel.findOne({ espn_team_id })
+            standingsWithTeam.push({ team, standing })
+        }
+        return standingsWithTeam;
     }
 
     async getDraft(year) {
@@ -110,12 +118,37 @@ module.exports = class LeagueService {
             const picksWithTeam = [];
             for (const draftPick of draftPicks) {
                 const pick = draftPick.toObject();
-                const team = await this.teamModel.findOne({year, espn_team_id: draftPick.ymys_team_id});
+                const team = await this.teamModel.findOne({espn_team_id: draftPick.ymys_team_id});
                 pick.team = team;
                 picksWithTeam.push(pick);
             }
             return picksWithTeam;
         }
         return { };
+    }
+
+    async postLeaguePowerRanking(body, week, year) {
+        const ranking_article = await this.powerRankingModel.findOneAndUpdate(
+            { week, year },
+            { $set: { body, week, year } },
+            { upsert: true, new: true, setDefaultsOnInsert: true }
+        )
+        return ranking_article;
+    }
+
+    async getLeaguePowerRanking(week, year) {
+        const ranking_article = await this.powerRankingModel.findOne(
+            { week, year }
+        )
+        return ranking_article.toObject();
+    }
+
+    async getLeaguePowerRankings() {
+        let powerRankings = await this.powerRankingModel.find(
+            {  },
+            ["year", "week"]
+        );
+        powerRankings = _.sortBy(powerRankings, ["year", "week"])
+        return powerRankings.map((powerRanking) => powerRanking.toObject());
     }
 };

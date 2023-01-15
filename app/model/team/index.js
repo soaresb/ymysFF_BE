@@ -7,22 +7,8 @@ const TeamSchema = new Schema({
         type: Number,
         required: true,
     },
-    year: {
-        type: Number,
-        required: true
-    },
-    division_id: {
-        type: Number,
-        required: true
-    },
-    faab: {
-        type: Number
-    },
     logo_url: {
         type: String,
-    },
-    losses: {
-        type: Number
     },
     name: {
         type: String,
@@ -32,24 +18,10 @@ const TeamSchema = new Schema({
         type: String,
         required: true,
     },
-    players: {
-        type: Array
-    },
-    roster: {
-        type: Array
-    },
-    schedule: {
-        type: Array
-    },
-    standing: {
-        type: Number
-    },
-    ties: {
-        type: Number
-    },
-    wins: {
-        type: Number
-    },
+    seasons: {
+        type: Array,
+        required: true
+    }
 }, { collection: "team" });
 
 if (!TeamSchema.options.toObject) TeamSchema.options.toObject = {};

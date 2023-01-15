@@ -1,7 +1,7 @@
 const _ = require("lodash");
 
 module.exports = {
-    sortRosterByPosition(roster) {
+    sortRosterByPosition(roster, key="slot_position") {
         const order = {
             "QB": 1,
             "RB": 2,
@@ -15,7 +15,7 @@ module.exports = {
             "IR": 10
         }
         return _.sortBy(roster, (player) => {
-            return order[player.slot_position];        
+            return order[player[key]];        
         })
     }
 }

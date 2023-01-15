@@ -8,8 +8,10 @@ module.exports = class TeamService {
         this.matchupModel = DB.model("Matchup");
         this.playerModel = DB.model("Player");
         this.playerStatsModel = DB.model("PlayerStats");
+        this.draftPickModel = DB.model("DraftPick");
         this.settings = Settings;
         this.sortRosterByPosition = Helpers.roster.sortRosterByPosition;
+        this.getMedian = Helpers.team.getMedian;
     }
 
     async getStandings(year) {
@@ -50,7 +52,7 @@ module.exports = class TeamService {
 
     async getTeamById(teamId, year, week) {
         const team = await this.teamModel
-            .findOne({ espn_team_id: teamId, year });
+            .findOne({ espn_team_id: teamId });
         if (team) {
             return team.toObject();
         } else {
@@ -60,7 +62,7 @@ module.exports = class TeamService {
 
     async getTeams(year) {
         const teams = await this.teamModel
-            .find({ year });
+            .find({ "seasons.year": year });
         if (teams) {
             return teams.map((team) => {
                 return { name: team.name, _id: team._id, espn_team_id: team.espn_team_id };
@@ -102,6 +104,66 @@ module.exports = class TeamService {
             .find(query);
         if (matchups) {
             return matchups.map((matchup) => { return matchup.toObject(); });
+        } else {
+            return [];
+        }
+    }
+
+    getBestValuePick(picks) {
+        let bestPick;
+        let biggestDifference = -1000000;
+        _.forEach(picks, (pick) => {
+            const preRank = parseInt(pick.pre_rank.replace(/\D/g,''));
+            const seasonRank = parseInt(pick.season_rank.replace(/\D/g,''));
+
+            if ((preRank - seasonRank) >= biggestDifference) {
+                bestPick = pick;
+                biggestDifference = (preRank - seasonRank);
+            }
+        });
+        return bestPick;
+    }
+
+    getPositionBreakdown(picks, position) {
+        let differences = [];
+        _.forEach(picks, (pick) => {
+            const preRank = parseInt(pick.pre_rank.replace(/\D/g,''));
+            const seasonRank = parseInt(pick.season_rank.replace(/\D/g,''));
+            differences.push(preRank-seasonRank);
+        });
+        return { 
+            position, 
+            avgDraftEfficiency: _.round(((_.sum(differences))/differences.length), 2),
+            medianDraftEfficiency: this.getMedian(differences)
+        }
+    }
+
+    async getDraftPicksDetails(draftPicks) {
+        const picksByPosition = _.groupBy(draftPicks, "position");
+        const details = { valuePicks: [], positionBreakdown: [] };
+        _.forOwn(picksByPosition, (picks, position) => {
+            details.positionBreakdown.push(this.getPositionBreakdown(picks, position));
+            details.valuePicks.push(this.getBestValuePick(picks));
+        })
+        details.valuePicks = this.sortRosterByPosition(details.valuePicks, "position")
+        return details;
+    }
+
+    async getDraftPicksByTeam(teamId, details = false) {
+        const draftPicks = await this.draftPickModel
+            .find({ ymys_team_id: teamId });
+        const data = { draftPicks: [] };
+        if (draftPicks) {
+            for (const draftPick of draftPicks) {
+                const pick = draftPick.toObject();
+                const team = await this.teamModel.findOne({espn_team_id: draftPick.ymys_team_id}, ["owner", "name", "logo_id"]);
+                pick.team = team;
+                data.draftPicks.push(pick);
+            }
+            if (details) {
+                data.details = await this.getDraftPicksDetails(data.draftPicks);
+            }
+            return data;
         } else {
             return [];
         }

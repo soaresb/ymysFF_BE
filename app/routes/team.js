@@ -25,5 +25,10 @@ apiRouter.get(
     (req, res, next) => { teamController.getMatchupsByTeam(req, res, next); }
 );
 
+apiRouter.get(
+    "/team/:teamId/draftpicks",
+    (req, res, next) => { teamController.getDraftPicksByTeam(req, res, next); }
+);
+
 module.exports = apiRouter;
 

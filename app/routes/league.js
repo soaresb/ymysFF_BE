@@ -46,5 +46,20 @@ apiRouter.get(
     (req, res, next) => { leagueController.getDraft(req, res, next); }
 );
 
+apiRouter.post(
+    "/league/power-ranking",
+    (req, res, next) => { leagueController.postLeaguePowerRanking(req, res, next); }
+);
+
+apiRouter.get(
+    "/league/power-ranking",
+    (req, res, next) => { leagueController.getLeaguePowerRanking(req, res, next); }
+);
+
+apiRouter.get(
+    "/league/power-rankings",
+    (req, res, next) => { leagueController.getLeaguePowerRankings(req, res, next); }
+);
+
 module.exports = apiRouter;
 

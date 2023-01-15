@@ -17,7 +17,7 @@ module.exports = class PlayerService {
         if (playerStats) {
             for (const playerStat of playerStats) {
                 const stat = playerStat.toObject();
-                stat.team = await this.teamModel.findOne({"espn_team_id": stat.team_id, year: stat.year});
+                stat.team = await this.teamModel.findOne({"espn_team_id": stat.team_id});
                 stats.push(stat);
             }
             return stats;
@@ -32,7 +32,7 @@ module.exports = class PlayerService {
         if (playerDraftHisory) {
             for (const draftHistory of playerDraftHisory) {
                 const draftPick = draftHistory.toObject();
-                draftPick.team = await this.teamModel.findOne({"espn_team_id": draftPick.ymys_team_id, year: draftPick.year});
+                draftPick.team = await this.teamModel.findOne({"espn_team_id": draftPick.ymys_team_id});
                 history.push(draftPick);
             }
             return history;
