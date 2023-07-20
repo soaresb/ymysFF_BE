@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const fileupload = require("express-fileupload");
 const { cradle: { config, logger, Helpers: { http: { formatResponse } }, } } = require("./container");
 
 const routes = require("./app/routes");
@@ -12,8 +13,10 @@ app.use(express.static(path));
 app.disable("x-powered-by");
 
 // #PARSERS
+app.use(fileupload());
 app.use(bodyParser.json({ limit: "20mb", strict: true }));
 app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(formidableMiddleware());
 
 // #CORS
 app.use((req, res, next) => {
@@ -27,6 +30,8 @@ app.use((req, res, next) => {
     }
     res.header("Access-Control-Allow-Methods", "GET, OPTIONS, POST, PUT, DELETE");
     res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.header("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
+
     return next();
 });
 

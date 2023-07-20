@@ -9,6 +9,7 @@ module.exports = class TeamService {
         this.playerModel = DB.model("Player");
         this.playerStatsModel = DB.model("PlayerStats");
         this.draftPickModel = DB.model("DraftPick");
+        this.rankingModel = DB.model("Ranking");
         this.settings = Settings;
         this.sortRosterByPosition = Helpers.roster.sortRosterByPosition;
         this.getMedian = Helpers.team.getMedian;
@@ -21,11 +22,16 @@ module.exports = class TeamService {
         return teams.map((team) => team.toObject());
     }
 
-    async getStandingsWithDivisions(year) {
-        const teams = await this.teamModel
-            .find({ year })
-            .sort("standing");
-        const groupedByDivision = _.groupBy(teams, (team) => team.division_id);
+    async getStandingsWithDivisions(year, week) {
+        let ranks = await this.rankingModel
+            .find({ year, week })
+            .sort("division_ranking");
+        ranks = ranks.map((rank) => {
+            return rank.toObject();
+        });
+        const groupedByDivision = _.groupBy(ranks, (rank) => {
+            return rank.division_id;
+        });
         return groupedByDivision;
     }
 

@@ -88,8 +88,10 @@ module.exports = class LeagueController {
 
     async postLeaguePowerRanking(req, res, next) {
         const { body, week, year } = req.body;
+        const parsedWeek = parseInt(week);
+        const parsedYear = parseInt(year);
         try {
-            const success = await this.leagueService.postLeaguePowerRanking(body, week, year);
+            const success = await this.leagueService.postLeaguePowerRanking(body, parsedWeek, parsedYear);
             if (success) {
                 res.status(200).json(this.formatResponse(200, "Success", success));
             } else {
@@ -121,6 +123,20 @@ module.exports = class LeagueController {
                 res.status(200).json(this.formatResponse(200, "Success", powerRankings));
             } else {
                 res.status(404).json(this.formatResponse(400, "Error adding ranking article.", [{ msg: "Error adding ranking article." }]));
+            }
+        } catch (err) {
+            next(err);
+        }
+    }
+
+    async uploadImage(req, res, next) {
+        try {
+            const { files } = req;
+            const url = await this.leagueService.uploadImage(files);
+            if (url) {
+                res.status(200).json(this.formatResponse(200, "Success", { url }));
+            } else {
+                res.status(404).json(this.formatResponse(400, "Error uploading image.", [{ msg: "Error uploading image." }]));
             }
         } catch (err) {
             next(err);

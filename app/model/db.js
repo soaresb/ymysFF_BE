@@ -12,6 +12,10 @@ require("./ranking_article");
 
 mongoose.Promise = Promise;
 
+mongoose.connection.on("open", function(ref) {
+    console.log("Connected to mongo server.");
+  });
+
 mongoose.connect(
     config.get("MONGODB_CONNECTION_STRING"),
     {

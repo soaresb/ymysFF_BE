@@ -61,5 +61,11 @@ apiRouter.get(
     (req, res, next) => { leagueController.getLeaguePowerRankings(req, res, next); }
 );
 
+apiRouter.post(
+    "/league/upload-image",
+    (req, res, next) => { leagueController.uploadImage(req, res, next); }
+);
+
+
 module.exports = apiRouter;
 

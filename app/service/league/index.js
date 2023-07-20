@@ -1,5 +1,9 @@
 const _ = require("lodash");
 const logger = require("../../utils/logger");
+const AWS = require('aws-sdk');
+const fs = require('fs');
+const Jimp = require("jimp");
+const config = require("../../config");
 
 module.exports = class LeagueService {
     constructor({ TeamService, Helpers, DB, Settings }) {
@@ -150,5 +154,28 @@ module.exports = class LeagueService {
         );
         powerRankings = _.sortBy(powerRankings, ["year", "week"])
         return powerRankings.map((powerRanking) => powerRanking.toObject());
+    }
+
+    async uploadImage(files) {
+        const { image }  = files;
+        const BUCKET_NAME = 'ymys';
+        const s3 = new AWS.S3({
+            accessKeyId: config.get("ID"),
+            secretAccessKey: config.get("SECRET")
+        });
+        const j = await Jimp.read(image.data);
+        j.resize(Jimp.AUTO, 900);
+        const buffer = await j.getBufferAsync(Jimp.AUTO);
+
+        const params = {
+            Bucket: BUCKET_NAME,
+            Key: `images/${image.name}`, // File name you want to save as in S3
+            Body: buffer
+        };
+
+        const resp = await s3.upload(params).promise()
+        if (resp) {
+            return resp.Location;
+        }
     }
 };

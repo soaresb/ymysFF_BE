@@ -27,8 +27,8 @@ module.exports = class TeamController {
 
     async getStandingsWithDivisions(req, res, next) {
         try {
-            const year = await this.settings.getYear();
-            const standings = await this.teamService.getStandingsWithDivisions(year);
+            const { current_year, current_week } = this.leagueService.getLeague();
+            const standings = await this.teamService.getStandingsWithDivisions(current_year, current_week);
             if (standings) {
                 res.status(200).json(this.formatResponse(200, "Success", standings));
             } else {
