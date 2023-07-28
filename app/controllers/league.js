@@ -10,7 +10,7 @@ module.exports = class LeagueController {
 
     async getLeagueInfo(req, res, next) {
         try {
-            const info = this.leagueService.getLeagueInfo()
+            const info = await this.leagueService.getLeagueInfo()
             if (info) {
                 res.status(200).json(this.formatResponse(200, "Success", info));
             } else {
@@ -104,8 +104,10 @@ module.exports = class LeagueController {
 
     async getLeaguePowerRanking(req, res, next) {
         const { week, year } = req.query;
+        const parsedWeek = parseInt(week);
+        const parsedYear = parseInt(year);
         try {
-            const powerRanking = await this.leagueService.getLeaguePowerRanking(week, year);
+            const powerRanking = await this.leagueService.getLeaguePowerRanking(parsedWeek, parsedYear);
             if (powerRanking) {
                 res.status(200).json(this.formatResponse(200, "Success", powerRanking));
             } else {

@@ -26,8 +26,12 @@ module.exports = class LeagueService {
         this.league = league;
     }
 
-    getLeagueInfo() {
-        return this.league;
+    async getLeagueInfo() {
+        const powerRankings = await this.getLeaguePowerRankings();
+        return {
+            powerRankings,
+            ...this.league
+        };
     }
 
     getLeague() {
