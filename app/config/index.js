@@ -4,7 +4,10 @@ const { isBoolean, toBoolean } = require("../helpers/boolean");
 
 const REGISTERED_KEYS = [
     "PORT",
-    "ALLOWED_ORIGINS"
+    "ALLOWED_ORIGINS",
+    "MONGODB_CONNECTION_STRING",
+    "ID",
+    "SECRET"
 ];
 
 const config = nconf
