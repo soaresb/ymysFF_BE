@@ -4,6 +4,7 @@ const AWS = require('aws-sdk');
 const fs = require('fs');
 const Jimp = require("jimp");
 const config = require("../../config");
+const { defaultCareerStandings } = require("../../constants/enums");
 
 module.exports = class LeagueService {
     constructor({ TeamService, Helpers, DB, Settings }) {
@@ -68,11 +69,11 @@ module.exports = class LeagueService {
         }
     }
 
-    async getCareerStandings(year) {
-        const standings = {};
+    async getCareerStandings(teamId) {
+        const standings = _.cloneDeep(defaultCareerStandings);
         let matchups = [];
-        if (year) {
-            matchups = await this.matchupModel.find({ year: parseInt(year) });
+        if (teamId) {
+            matchups = await this.matchupModel.find({ $or: [{ "away_team.id": teamId } ,{ "home_team.id": teamId }], post_elimination: { $ne: true } });
         } else {
             matchups = await this.matchupModel.find({ post_elimination: { $ne: true } });
         }
@@ -81,8 +82,10 @@ module.exports = class LeagueService {
                if (!_.isNull(matchup.away_team) && _.has(standings, matchup.away_team.id)) {
                    if (matchup.away_team.id === parseInt(matchup.winner)) {
                         this.addToObject(standings, `${matchup.away_team.id}.wins`, 1);
+                        this.addToObject(standings, `${matchup.away_team.id}.${matchup.year}.wins`, 1);
                    } else {
                         this.addToObject(standings, `${matchup.away_team.id}.losses`, 1);
+                        this.addToObject(standings, `${matchup.away_team.id}.${matchup.year}.losses`, 1);
                    }
                } else {
                     if (_.isNull(matchup.away_team)) {
@@ -91,30 +94,39 @@ module.exports = class LeagueService {
                     standings[matchup.away_team.id] = {};
                     if (matchup.away_team.id === parseInt(matchup.winner)) {
                         this.addToObject(standings, `${matchup.away_team.id}.wins`, 1);
+                        this.addToObject(standings, `${matchup.away_team.id}.${matchup.year}.wins`, 1);
                     } else {
                         this.addToObject(standings, `${matchup.away_team.id}.losses`, 1);
+                        this.addToObject(standings, `${matchup.away_team.id}.${matchup.year}.losses`, 1);
                     }
                }
                if (!_.isNull(matchup.home_team) && _.has(standings, matchup.home_team.id)) {
                     if (matchup.home_team.id === parseInt(matchup.winner)) {
                         this.addToObject(standings, `${matchup.home_team.id}.wins`, 1);
+                        this.addToObject(standings, `${matchup.home_team.id}.${matchup.year}.wins`, 1);
                     } else {
                         this.addToObject(standings, `${matchup.home_team.id}.losses`, 1);
+                        this.addToObject(standings, `${matchup.home_team.id}.${matchup.year}.losses`, 1);
                     }
                 } else {
                     standings[matchup.home_team.id] = {};
                     if (matchup.home_team.id === parseInt(matchup.winner)) {
                         this.addToObject(standings, `${matchup.home_team.id}.wins`, 1);
+                        this.addToObject(standings, `${matchup.home_team.id}.${matchup.year}.wins`, 1);
                     } else {
                         this.addToObject(standings, `${matchup.home_team.id}.losses`, 1);
+                        this.addToObject(standings, `${matchup.home_team.id}.${matchup.year}.losses`, 1);
                     }
                 }
             });
         }
         const standingsWithTeam = []
         for (const espn_team_id of Object.keys(standings)) {
+            if (teamId && teamId !== parseInt(espn_team_id, 10)) {
+                continue;
+            }
             const standing = standings[espn_team_id];
-            const team = await this.teamModel.findOne({ espn_team_id })
+            const team = await this.teamModel.findOne({ espn_team_id }, ["owner", "name", "espn_team_id"])
             standingsWithTeam.push({ team, standing })
         }
         return standingsWithTeam;

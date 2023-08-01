@@ -12,7 +12,7 @@ module.exports = class PlayerService {
     }
 
     async getPlayerStats(playerId) {
-        const playerStats = await this.playerStatsModel.find({ espn_id: playerId });
+        const playerStats = await this.playerStatsModel.find({ espn_id: playerId }).sort({year: -1, week: -1});
         const stats = [];
         if (playerStats) {
             for (const playerStat of playerStats) {

@@ -56,8 +56,9 @@ module.exports = class LeagueController {
 
     async getCareerStandings(req, res, next) {
         try {
-            const { year } = req.query;
-            const standings = await this.leagueService.getCareerStandings(year)
+            let { teamId } = req.query;
+            teamId = parseInt(teamId, 10)
+            const standings = await this.leagueService.getCareerStandings(teamId)
             if (standings) {
                 res.status(200).json(this.formatResponse(200, "Success", standings));
             } else {

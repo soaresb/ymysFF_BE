@@ -100,14 +100,12 @@ module.exports = class TeamService {
     }
 
     async getMatchupsByTeam(teamId, opponent=null) {
-        let query = {};
+        let query = { post_elimination: { $ne: true } };
         if (opponent) {
-            query = {
-                $or: [{ "away_team.id": teamId, "home_team.id": opponent }, { "away_team.id": teamId, "home_team.id": opponent }]
-            }
-        } else { query = { $or: [{ "away_team.id": teamId }, { "home_team.id": teamId }] }; }
+            query["$or"] = [{ "away_team.id": teamId, "home_team.id": opponent }, { "away_team.id": teamId, "home_team.id": opponent }]
+        } else { query["$or"] = [{ "away_team.id": teamId }, { "home_team.id": teamId }]; }
         const matchups = await this.matchupModel
-            .find(query);
+            .find(query).sort({year: -1, week: -1});
         if (matchups) {
             return matchups.map((matchup) => { return matchup.toObject(); });
         } else {
@@ -158,11 +156,11 @@ module.exports = class TeamService {
     async getDraftPicksByTeam(teamId, details = false) {
         const draftPicks = await this.draftPickModel
             .find({ ymys_team_id: teamId });
+        const team = await this.teamModel.findOne({espn_team_id: teamId}, ["owner", "name", "logo_id"]);
         const data = { draftPicks: [] };
         if (draftPicks) {
             for (const draftPick of draftPicks) {
                 const pick = draftPick.toObject();
-                const team = await this.teamModel.findOne({espn_team_id: draftPick.ymys_team_id}, ["owner", "name", "logo_id"]);
                 pick.team = team;
                 data.draftPicks.push(pick);
             }
