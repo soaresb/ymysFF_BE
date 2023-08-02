@@ -129,7 +129,7 @@ module.exports = class LeagueService {
             const team = await this.teamModel.findOne({ espn_team_id }, ["owner", "name", "espn_team_id"])
             standingsWithTeam.push({ team, standing })
         }
-        return standingsWithTeam;
+        return _.orderBy(standingsWithTeam, [(standing) => (standing.standing.wins / standing.standing.losses)], "desc")
     }
 
     async getDraft(year) {
