@@ -10,6 +10,7 @@ module.exports = class TeamService {
         this.playerStatsModel = DB.model("PlayerStats");
         this.draftPickModel = DB.model("DraftPick");
         this.rankingModel = DB.model("Ranking");
+        this.superlativeModel = DB.model("Superlative");
         this.settings = Settings;
         this.sortRosterByPosition = Helpers.roster.sortRosterByPosition;
         this.getMedian = Helpers.team.getMedian;
@@ -171,6 +172,17 @@ module.exports = class TeamService {
         } else {
             return [];
         }
+    }
+
+    async getSuperlatives(teamId) {
+        const query = {}
+        if (teamId) {
+            query.ymys_team_id = parseInt(teamId, 10);
+        }
+        const superlatives = await this.superlativeModel
+            .find(query).lean();
+
+        return superlatives;
     }
 
 };

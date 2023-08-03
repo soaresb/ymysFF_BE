@@ -145,4 +145,20 @@ module.exports = class TeamController {
         }
     }
 
+    async getSuperlatives(req, res, next) {
+        try {
+            const { teamId } = req.query
+            const data = await this.teamService.getSuperlatives(teamId);
+            if (data) {
+                res.status(200).json(this.formatResponse(200, "Success", data));
+            } else {
+                res.status(404).json(this.formatResponse(404, "Not found", [{ msg: "Record not found." }]));
+            }
+            
+            
+        } catch (err) {
+            next(err);
+        }
+    }
+
 };

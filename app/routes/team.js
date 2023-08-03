@@ -11,6 +11,11 @@ apiRouter.get(
 );
 
 apiRouter.get(
+    "/team/superlatives",
+    (req, res, next) => { teamController.getSuperlatives(req, res, next); }
+);
+
+apiRouter.get(
     "/team/:teamId",
     (req, res, next) => { teamController.getTeamById(req, res, next); }
 );
