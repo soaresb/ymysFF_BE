@@ -22,7 +22,10 @@ const SuperlativeSchema = new Schema({
     year: {
         type: Number,
         required: true,
-    }
+    },
+    value: {
+        type: String
+    },
 }, { collection: "superlative" });
 
 if (!SuperlativeSchema.options.toObject) SuperlativeSchema.options.toObject = {};
