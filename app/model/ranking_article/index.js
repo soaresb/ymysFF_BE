@@ -14,6 +14,9 @@ const PowerRankingSchema = new Schema({
     body: {
         type: String,
         required: true
+    },
+    hidden: {
+        type: Boolean
     }
     
 }, { collection: "ranking_article" });

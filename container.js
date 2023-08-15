@@ -8,11 +8,13 @@ const PlayerController = require("./app/controllers/player");
 const TeamController = require("./app/controllers/team");
 const LeagueController = require("./app/controllers/league");
 const SeasonController = require("./app/controllers/season");
+const AuthController = require("./app/controllers/auth");
 
 const TeamService = require("./app/service/team");
 const SeasonService = require("./app/service/season");
 const LeagueService = require("./app/service/league");
 const PlayerService = require("./app/service/player");
+const AuthService = require("./app/service/auth");
 
 
 const container = awilix.createContainer();
@@ -33,10 +35,12 @@ container.register({ PlayerController: asClass(PlayerController) });
 container.register({ TeamController: asClass(TeamController) });
 container.register({ LeagueController: asClass(LeagueController) });
 container.register({ SeasonController: asClass(SeasonController) });
+container.register({ AuthController: asClass(AuthController) });
 
 container.register({ TeamService: asClass(TeamService) });
 container.register({ SeasonService: asClass(SeasonService) });
 container.register({ PlayerService: asClass(PlayerService) });
 container.register({ LeagueService: asClass(LeagueService, { lifetime: Lifetime.SINGLETON }) });
+container.register({ AuthService: asClass(AuthService) });
 
 module.exports = container;

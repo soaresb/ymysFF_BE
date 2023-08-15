@@ -7,7 +7,10 @@ const REGISTERED_KEYS = [
     "ALLOWED_ORIGINS",
     "MONGODB_CONNECTION_STRING",
     "ID",
-    "SECRET"
+    "SECRET",
+    "YMYS_ADMIN_USERNAME",
+    "YMYS_ADMIN_PASSWORD",
+    "YMYS_JWT_SECRET"
 ];
 
 const config = nconf

@@ -87,12 +87,26 @@ module.exports = class LeagueController {
         }
     }
 
+    async getDraftYears(req, res, next) {
+        try {
+            const years = await this.leagueService.getDraftYears();
+            if (years) {
+                res.status(200).json(this.formatResponse(200, "Success", years));
+            } else {
+                res.status(404).json(this.formatResponse(404, "Not found", [{ msg: "Drafts not found." }]));
+            }
+            
+        } catch (err) {
+            next(err);
+        }
+    }
+
     async postLeaguePowerRanking(req, res, next) {
-        const { body, week, year } = req.body;
+        const { body, week, year, hidden } = req.body;
         const parsedWeek = parseInt(week);
         const parsedYear = parseInt(year);
         try {
-            const success = await this.leagueService.postLeaguePowerRanking(body, parsedWeek, parsedYear);
+            const success = await this.leagueService.postLeaguePowerRanking(body, parsedWeek, parsedYear, hidden);
             if (success) {
                 res.status(200).json(this.formatResponse(200, "Success", success));
             } else {

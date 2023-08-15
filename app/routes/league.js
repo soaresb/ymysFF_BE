@@ -46,6 +46,11 @@ apiRouter.get(
     (req, res, next) => { leagueController.getDraft(req, res, next); }
 );
 
+apiRouter.get(
+    "/league/draft/years",
+    (req, res, next) => { leagueController.getDraftYears(req, res, next); }
+);
+
 apiRouter.post(
     "/league/power-ranking",
     (req, res, next) => { leagueController.postLeaguePowerRanking(req, res, next); }

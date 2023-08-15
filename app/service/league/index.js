@@ -40,7 +40,7 @@ module.exports = class LeagueService {
     }
 
     async getLeagueRankings(week, year) {
-        const rankings = await this.rankingsModel.find({ week, year }).sort({ranking: 1});
+        const rankings = await this.rankingsModel.find({ week, year, hidden: { $ne: true } }).sort({ranking: 1});
         if (rankings) {
             return rankings.map((ranking) => ranking.toObject());
         }
@@ -126,19 +126,24 @@ module.exports = class LeagueService {
                 continue;
             }
             const standing = standings[espn_team_id];
-            const team = await this.teamModel.findOne({ espn_team_id }, ["owner", "name", "espn_team_id"])
+            const team = await this.teamModel.findOne({ espn_team_id }, ["owner", "name", "espn_team_id", "logo_url"])
             standingsWithTeam.push({ team, standing })
         }
         return _.orderBy(standingsWithTeam, [(standing) => (standing.standing.wins / standing.standing.losses)], "desc")
     }
 
     async getDraft(year) {
-        const draftPicks = await this.draftPickModel.find({ year }).sort("total_pick")
+        const draftPicks = await this.draftPickModel.find({ year }).sort("total_pick");
+        let teams = await this.teamModel.find({});
+        const teamMap = {};
+        _.forEach(teams, (team) => {
+            teamMap[team.espn_team_id] = team
+        })
         if (draftPicks) {
             const picksWithTeam = [];
             for (const draftPick of draftPicks) {
                 const pick = draftPick.toObject();
-                const team = await this.teamModel.findOne({espn_team_id: draftPick.ymys_team_id});
+                const team = teamMap[draftPick.ymys_team_id];
                 pick.team = team;
                 picksWithTeam.push(pick);
             }
@@ -147,10 +152,15 @@ module.exports = class LeagueService {
         return { };
     }
 
-    async postLeaguePowerRanking(body, week, year) {
+    async getDraftYears() {
+        const years = await this.ardraftPickModel.find().distinct("year");
+        return years;
+    }
+
+    async postLeaguePowerRanking(body, week, year, hidden = false) {
         const ranking_article = await this.powerRankingModel.findOneAndUpdate(
             { week, year },
-            { $set: { body, week, year } },
+            { $set: { body, week, year, hidden } },
             { upsert: true, new: true, setDefaultsOnInsert: true }
         )
         return ranking_article;
@@ -165,8 +175,8 @@ module.exports = class LeagueService {
 
     async getLeaguePowerRankings() {
         let powerRankings = await this.powerRankingModel.find(
-            {  },
-            ["year", "week"]
+            { hidden: { $ne: true } },
+            ["year", "week", "hidden"]
         );
         powerRankings = _.sortBy(powerRankings, ["year", "week"])
         return powerRankings.map((powerRanking) => powerRanking.toObject());
